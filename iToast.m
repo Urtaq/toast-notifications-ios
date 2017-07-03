@@ -71,12 +71,25 @@ static iToastSettings *sharedSettings = nil;
 	UIImage *image = [theSettings.images valueForKey:[NSString stringWithFormat:@"%i", type]];
 	
 	UIFont *font = [UIFont systemFontOfSize:theSettings.fontSize];
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+    paragraphStyle.lineSpacing = theSettings.lineSpace;
+    if (theSettings.lineSpace == 0.f) {
+        paragraphStyle.lineSpacing = 1.f;
+    }
 
-    NSAttributedString *attributedText =[[NSAttributedString alloc] initWithString:text attributes:@{ NSFontAttributeName: font}];
-    CGRect rect = [attributedText boundingRectWithSize:CGSizeMake(280, 60)
+    CGRect screenBounds = [UIScreen mainScreen].bounds;
+    CGFloat toastMaxWidth = screenBounds.size.width - 40.f;
+    NSAttributedString *attributedText =[[NSAttributedString alloc] initWithString:text attributes:@{ NSFontAttributeName: font,
+                                                                                                      NSParagraphStyleAttributeName: paragraphStyle
+                                                                                                      }];
+    CGRect rect = [attributedText boundingRectWithSize:CGSizeMake(toastMaxWidth, 60)
                                                options:NSStringDrawingUsesLineFragmentOrigin
                                                context:nil];
     CGSize textSize = rect.size;
+    if (rect.size.height == font.lineHeight + paragraphStyle.lineSpacing) {
+        textSize.height -= paragraphStyle.lineSpacing;
+    }
+
     UIEdgeInsets insets = theSettings.insets;
     if (UIEdgeInsetsEqualToEdgeInsets(insets, UIEdgeInsetsZero)) {
         insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
@@ -85,10 +98,14 @@ static iToastSettings *sharedSettings = nil;
     CGFloat paddingForHeight = insets.top + insets.bottom;
 
 	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(insets.left, insets.top, textSize.width, textSize.height)];
-	label.backgroundColor = [UIColor clearColor];
+	label.backgroundColor = [UIColor redColor];
 	label.textColor = [UIColor whiteColor];
 	label.font = font;
-	label.text = text;
+    if (rect.size.height == font.lineHeight + paragraphStyle.lineSpacing) {
+        label.text = text;
+    } else {
+        label.attributedText = attributedText;
+    }
 	label.numberOfLines = 0;
 	if (theSettings.useShadow) {
 		label.shadowColor = [UIColor darkGrayColor];
@@ -345,6 +362,11 @@ static iToastSettings *sharedSettings = nil;
     return self;
 }
 
+- (iToast *) setLineSpacing:(CGFloat ) lineSpace {
+    [self theSettings].lineSpace = lineSpace;
+    return self;
+}
+
 - (iToast *) setDuration:(NSInteger ) duration{
 	[self theSettings].duration = duration;
 	return self;
@@ -471,6 +493,7 @@ static iToastSettings *sharedSettings = nil;
 		sharedSettings.offsetLeft = 0;
 		sharedSettings.offsetTop = 0;
         sharedSettings.insets = UIEdgeInsetsZero;
+        sharedSettings.lineSpace = 1.f;
 	}
 	
 	return sharedSettings;
@@ -492,6 +515,7 @@ static iToastSettings *sharedSettings = nil;
 	copy.offsetLeft = self.offsetLeft;
 	copy.offsetTop = self.offsetTop;
     copy.insets = self.insets;
+    copy.lineSpace = self.lineSpace;
 	
 	NSArray *keys = [self.images allKeys];
 	

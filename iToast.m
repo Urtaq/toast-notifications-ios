@@ -97,10 +97,10 @@ static iToastSettings *sharedSettings = nil;
     CGFloat paddingForWidth = insets.left + insets.right;
     CGFloat paddingForHeight = insets.top + insets.bottom;
 
-	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(insets.left, insets.top, textSize.width, textSize.height)];
-	label.backgroundColor = [UIColor redColor];
-	label.textColor = [UIColor whiteColor];
-	label.font = font;
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(insets.left, insets.top, textSize.width, textSize.height)];
+    label.backgroundColor = [UIColor clearColor];
+    label.textColor = [UIColor whiteColor];
+    label.font = font;
     if (rect.size.height == font.lineHeight + paragraphStyle.lineSpacing) {
         label.text = text;
     } else {

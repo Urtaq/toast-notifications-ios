@@ -78,13 +78,13 @@ static iToastSettings *sharedSettings = nil;
                                                context:nil];
     CGSize textSize = rect.size;
     UIEdgeInsets insets = theSettings.insets;
-    if (insets == UIEdgeInsetsZero) {
+    if (UIEdgeInsetsEqualToEdgeInsets(insets, UIEdgeInsetsZero)) {
         insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
     }
     CGFloat paddingForWidth = insets.left + insets.right;
     CGFloat paddingForHeight = insets.top + insets.bottom;
 
-	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, textSize.width + paddingForWidth, textSize.height + paddingForHeight)];
+	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(insets.left, insets.top, textSize.width, textSize.height)];
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UIColor whiteColor];
 	label.font = font;
@@ -254,8 +254,14 @@ static iToastSettings *sharedSettings = nil;
 - (CGRect)_toastFrameForImageSize:(CGSize)imageSize withLocation:(iToastImageLocation)location andTextSize:(CGSize)textSize {
     CGRect theRect = CGRectZero;
 
+    iToastSettings *theSettings = _settings;
+
+    if (!theSettings) {
+        theSettings = [iToastSettings getSharedSettings];
+    }
+
     UIEdgeInsets insets = theSettings.insets;
-    if (insets == UIEdgeInsetsZero) {
+    if (UIEdgeInsetsEqualToEdgeInsets(insets, UIEdgeInsetsZero)) {
         insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
     }
     CGFloat paddingForWidth = insets.left + insets.right;
@@ -264,13 +270,13 @@ static iToastSettings *sharedSettings = nil;
     switch (location) {
         case iToastImageLocationLeft:
             theRect = CGRectMake(0, 0, 
-                                 imageSize.width + textSize.width + paddingForWidth * 0.5 * 3,
+                                 imageSize.width + textSize.width + paddingForWidth,
                                  MAX(textSize.height, imageSize.height) + paddingForHeight);
             break;
         case iToastImageLocationTop:
             theRect = CGRectMake(0, 0, 
                                  MAX(textSize.width, imageSize.width) + paddingForWidth,
-                                 imageSize.height + textSize.height + paddingForHeight * 0.5 * 3);
+                                 imageSize.height + textSize.height + paddingForHeight);
             
         default:
             break;
@@ -287,7 +293,7 @@ static iToastSettings *sharedSettings = nil;
     CGRect imageFrame = CGRectZero;
 
     UIEdgeInsets insets = theSettings.insets;
-    if (insets == UIEdgeInsetsZero) {
+    if (UIEdgeInsetsEqualToEdgeInsets(insets, UIEdgeInsetsZero)) {
         insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
     }
 

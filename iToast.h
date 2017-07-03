@@ -67,6 +67,8 @@ typedef enum {
 
 - (void) show;
 - (void) show:(iToastType) type;
+- (iToast *) setPadding:(CGFloat ) padding;
+- (iToast *) setEdgeInsets:(UIEdgeInsets ) insets;
 - (iToast *) setDuration:(NSInteger ) duration;
 - (iToast *) setGravity:(iToastGravity) gravity 
 			 offsetLeft:(NSInteger) left
@@ -124,6 +126,7 @@ typedef enum {
 @property(assign) NSInteger offsetTop;
 @property(readonly) NSDictionary *images;
 @property(assign) iToastImageLocation imageLocation;
+@property(assign) UIEdgeInsets insets;
 
 
 - (void) setImage:(UIImage *)img forType:(iToastType) type;

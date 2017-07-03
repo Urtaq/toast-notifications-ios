@@ -77,8 +77,14 @@ static iToastSettings *sharedSettings = nil;
                                                options:NSStringDrawingUsesLineFragmentOrigin
                                                context:nil];
     CGSize textSize = rect.size;
-	
-	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, textSize.width + kComponentPadding, textSize.height + kComponentPadding)];
+    UIEdgeInsets insets = theSettings.insets;
+    if (insets == UIEdgeInsetsZero) {
+        insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
+    }
+    CGFloat paddingForWidth = insets.left + insets.right;
+    CGFloat paddingForHeight = insets.top + insets.bottom;
+
+	UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, textSize.width + paddingForWidth, textSize.height + paddingForHeight)];
 	label.backgroundColor = [UIColor clearColor];
 	label.textColor = [UIColor whiteColor];
 	label.font = font;
@@ -96,22 +102,22 @@ static iToastSettings *sharedSettings = nil;
         switch ([theSettings imageLocation]) {
             case iToastImageLocationLeft:
                 [label setTextAlignment:NSTextAlignmentLeft];
-                label.center = CGPointMake(image.size.width + kComponentPadding * 2 
-                                           + (v.frame.size.width - image.size.width - kComponentPadding * 2) / 2, 
+                label.center = CGPointMake(image.size.width + paddingForWidth
+                                           + (v.frame.size.width - image.size.width - paddingForWidth) / 2,
                                            v.frame.size.height / 2);
                 break;
             case iToastImageLocationTop:
                 [label setTextAlignment:NSTextAlignmentCenter];
                 label.center = CGPointMake(v.frame.size.width / 2, 
-                                           (image.size.height + kComponentPadding * 2 
-                                            + (v.frame.size.height - image.size.height - kComponentPadding * 2) / 2));
+                                           (image.size.height + paddingForHeight
+                                            + (v.frame.size.height - image.size.height - paddingForHeight) / 2));
                 break;
             default:
                 break;
         }
 		
 	} else {
-		v.frame = CGRectMake(0, 0, textSize.width + kComponentPadding * 2, textSize.height + kComponentPadding * 2);
+		v.frame = CGRectMake(0, 0, textSize.width + paddingForWidth, textSize.height + paddingForHeight);
 		label.center = CGPointMake(v.frame.size.width / 2, v.frame.size.height / 2);
 	}
 	CGRect lbfrm = label.frame;
@@ -247,16 +253,24 @@ static iToastSettings *sharedSettings = nil;
 
 - (CGRect)_toastFrameForImageSize:(CGSize)imageSize withLocation:(iToastImageLocation)location andTextSize:(CGSize)textSize {
     CGRect theRect = CGRectZero;
+
+    UIEdgeInsets insets = theSettings.insets;
+    if (insets == UIEdgeInsetsZero) {
+        insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
+    }
+    CGFloat paddingForWidth = insets.left + insets.right;
+    CGFloat paddingForHeight = insets.top + insets.bottom;
+
     switch (location) {
         case iToastImageLocationLeft:
             theRect = CGRectMake(0, 0, 
-                                 imageSize.width + textSize.width + kComponentPadding * 3, 
-                                 MAX(textSize.height, imageSize.height) + kComponentPadding * 2);
+                                 imageSize.width + textSize.width + paddingForWidth * 0.5 * 3,
+                                 MAX(textSize.height, imageSize.height) + paddingForHeight);
             break;
         case iToastImageLocationTop:
             theRect = CGRectMake(0, 0, 
-                                 MAX(textSize.width, imageSize.width) + kComponentPadding * 2, 
-                                 imageSize.height + textSize.height + kComponentPadding * 3);
+                                 MAX(textSize.width, imageSize.width) + paddingForWidth,
+                                 imageSize.height + textSize.height + paddingForHeight * 0.5 * 3);
             
         default:
             break;
@@ -272,12 +286,17 @@ static iToastSettings *sharedSettings = nil;
     
     CGRect imageFrame = CGRectZero;
 
+    UIEdgeInsets insets = theSettings.insets;
+    if (insets == UIEdgeInsetsZero) {
+        insets = UIEdgeInsetsMake(kComponentPadding, kComponentPadding, kComponentPadding, kComponentPadding);
+    }
+
     switch ([theSettings imageLocation]) {
         case iToastImageLocationLeft:
-            imageFrame = CGRectMake(kComponentPadding, (toastFrame.size.height - image.size.height) / 2, image.size.width, image.size.height);
+            imageFrame = CGRectMake(insets.left, (toastFrame.size.height - image.size.height) / 2, image.size.width, image.size.height);
             break;
         case iToastImageLocationTop:
-            imageFrame = CGRectMake((toastFrame.size.width - image.size.width) / 2, kComponentPadding, image.size.width, image.size.height);
+            imageFrame = CGRectMake((toastFrame.size.width - image.size.width) / 2, insets.top, image.size.width, image.size.height);
             break;
             
         default:
@@ -310,6 +329,15 @@ static iToastSettings *sharedSettings = nil;
 	return toast;
 }
 
+- (iToast *) setPadding:(CGFloat ) padding {
+    [self theSettings].insets = UIEdgeInsetsMake(padding, padding, padding, padding);
+    return self;
+}
+
+- (iToast *) setEdgeInsets:(UIEdgeInsets ) insets {
+    [self theSettings].insets = insets;
+    return self;
+}
 
 - (iToast *) setDuration:(NSInteger ) duration{
 	[self theSettings].duration = duration;
@@ -436,6 +464,7 @@ static iToastSettings *sharedSettings = nil;
 		sharedSettings.bgAlpha = 0.7;
 		sharedSettings.offsetLeft = 0;
 		sharedSettings.offsetTop = 0;
+        sharedSettings.insets = UIEdgeInsetsZero;
 	}
 	
 	return sharedSettings;
@@ -456,6 +485,7 @@ static iToastSettings *sharedSettings = nil;
 	copy.bgAlpha = self.bgAlpha;
 	copy.offsetLeft = self.offsetLeft;
 	copy.offsetTop = self.offsetTop;
+    copy.insets = self.insets;
 	
 	NSArray *keys = [self.images allKeys];
 	
